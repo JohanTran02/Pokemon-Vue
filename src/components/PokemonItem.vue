@@ -8,6 +8,7 @@ const props = defineProps<{
 
 const api = new PokemonClient();
 const pokemon = ref<Pokemon>({} as Pokemon)
+const loading = ref<boolean>(false);
 
 const pokemonImg = computed(() => {
   const pokemonImage : string = pokemon.value.sprites.other?.['official-artwork'].front_default as string ?? pokemon.value.sprites.front_default as string;
@@ -19,21 +20,23 @@ watchEffect(async () => {
 })
 
 async function getPokemon () {
+  loading.value = true;
   try{
     pokemon.value = await api.getPokemonByName(props.pokemonName);
-    console.log(pokemon.value)
   }catch(error){
     if(error instanceof AxiosError){
       console.log(error.response);
     }
     else throw error;
+  }finally{
+    loading.value = false
   }
 }
 </script>
 
 <template>
-  <div v-if="pokemon && pokemon.sprites" class="capitalize">
-    <img :src="pokemonImg" :alt="pokemon.name" class="w-full object-cover bg-slate-400">
+  <div v-if="!loading" class="capitalize">
+    <RouterLink :to="`pokemon/${props.pokemonName}`" ><img :src="pokemonImg" :alt="pokemon.name" class="w-full object-cover bg-slate-400"></RouterLink>
     <p>#{{ pokemon.id }}</p>
     <h1 class="font-bold text-xl py-2">{{ pokemon.name }}</h1>
     <div class="flex gap-2">

@@ -1,11 +1,10 @@
 import { createMemoryHistory, createRouter } from 'vue-router'
-
-import HomeView from './HomeView.vue'
-import AboutView from './AboutView.vue'
+import PokemonHome from './components/PokemonHome.vue'
+import PokemonDetails from './components/PokemonDetails.vue'
 
 const routes = [
-    { path: '/', component: HomeView },
-    { path: '/about', component: AboutView },
+    { path: '/', component: PokemonHome },
+    { path: '/pokemon/:name', component: PokemonDetails, props: true },
 ]
 
 const router = createRouter({
