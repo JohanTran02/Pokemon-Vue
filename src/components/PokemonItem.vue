@@ -1,12 +1,12 @@
 <script setup lang="ts">
+import { store } from '@/store';
 import { AxiosError } from 'axios';
-import { PokemonClient, type Pokemon } from 'pokenode-ts';
+import { type Pokemon } from 'pokenode-ts';
 import { computed, ref, watchEffect } from 'vue';
 const props = defineProps<{
   pokemonName: string,
 }>()
 
-const api = new PokemonClient();
 const pokemon = ref<Pokemon>({} as Pokemon)
 const loading = ref<boolean>(false);
 
@@ -22,7 +22,7 @@ watchEffect(async () => {
 async function getPokemon () {
   loading.value = true;
   try{
-    pokemon.value = await api.getPokemonByName(props.pokemonName);
+    pokemon.value = await store.pokemonEndpoints.getPokemonByName(props.pokemonName);
   }catch(error){
     if(error instanceof AxiosError){
       console.log(error.response);
