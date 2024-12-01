@@ -10,7 +10,6 @@ const props = defineProps<{
 
 const pokemon = ref<Pokemon>({} as Pokemon);
 const pokemonDesc = ref<PokemonSpecies>({} as PokemonSpecies);
-// const pokemonTypes = ref<Type[]>([]);
 const loading = ref<boolean>(false);
 
 interface PokemonStats{
@@ -157,30 +156,49 @@ async function getPokemonTypes () : Promise<Type[]>{
 </script>
 
 <template>
-    <div class="mx-auto">
-        <div v-if="!loading" class="p-4" >
-            <img :src="pokemonImg" :alt="pokemon.name" class="w-full object-cover bg-slate-400">
-            <p class="break-keep">{{ pokemonDesc.flavor_text_entries[3].flavor_text }}</p>
-            <p>{{ pokemon.height / 10}} m</p>
-            <p>{{ pokemon.name }}</p>
-            <p>{{ pokemon.weight / 10}} kg</p>
-            <p>{{ pokemon.id }}</p>
-            <template v-for="abilities in pokemonAbiliites" :key="abilities">
-                <p v-if="!abilities.is_hidden">{{ abilities.ability.name }}</p>
-            </template>
-            <div class="flex gap-2">
-                <p v-for="types in pokemon.types" :key="types.type.name" class="bg-blue-400 p-1 rounded-md">{{ types.type.name }}</p>
+    <div class="mx-auto pokemonDetails">
+        <div v-if="!loading" class="p-4 pokemonContainer">
+            <img :src="pokemonImg" :alt="pokemon.name" class="object-cover bg-slate-400">
+            <div class="text-xl">
+                <p>{{ pokemonDesc.flavor_text_entries[3].flavor_text }}</p>
+                <div class="capitalize">
+                    <h1>height</h1>
+                    <p class="lowercase">{{ pokemon.height / 10}} m</p>
+                    <p>{{ pokemon.name }}</p>
+                    <h1>weight</h1>
+                    <p class="lowercase">{{ pokemon.weight / 10}} kg</p>
+                    <p>{{ pokemon.id }}</p>
+                    <template v-for="abilities in pokemonAbiliites" :key="abilities">
+                        <h1>abilities</h1>
+                        <p v-if="!abilities.is_hidden">{{ abilities.ability.name }}</p>
+                    </template>
+                </div>
             </div>
-            <div>
-                <h1 class="text-2xl">Stats</h1>
-                <p v-for="stats in pokemonStats" :key="stats.name">{{ stats.name }}:{{ stats.base_stat }}</p>
+            <div >
+                <h1 class="text-2xl font-bold">Stats</h1>
+                <p v-for="stats in pokemonStats" :key="stats.name" class="text-xl">{{ stats.name }}:{{ stats.base_stat }}</p>
+            </div>
+            <div class="flex flex-col gap-2 capitalize">
+                <div>
+                    <h1 class="font-bold text-2xl">type</h1>
+                    <p v-for="types in pokemon.types" :key="types.type.name" class="bg-blue-400 p-1 rounded-md text-xl">{{ types.type.name }}</p>
+                </div>
+                <div>
+                    <h1 class="font-bold text-2xl">weaknesses</h1>
+                    <p v-for="types in pokemon.types" :key="types.type.name" class="bg-blue-400 p-1 rounded-md text-xl">{{ types.type.name }}</p>
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <style scoped>
-    div{
+    .pokemonDetails{
         max-width: 970px;
+    }
+    .pokemonContainer{
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr) );
+        gap: 10px;
     }
 </style>
