@@ -1,50 +1,26 @@
 <script setup lang="ts">
-import { store } from '@/store';
 import { AxiosError } from 'axios';
-import { type Pokemon, type PokemonSpecies, type Type} from 'pokenode-ts';
+import { type Pokemon, type PokemonSpecies, type Type } from 'pokenode-ts';
 import { computed, ref, watchEffect } from 'vue';
 import PokemonType from './PokemonType.vue';
+import { getPokemon, getPokemonDesc, getPokemonTypes } from './functions/fetch';
+import { calculateWeaknesses } from './functions/func';
 
 const props = defineProps<{
-    name : string
+    name: string
 }>();
 
 const pokemon = ref<Pokemon>({} as Pokemon);
 const pokemonDesc = ref<PokemonSpecies>({} as PokemonSpecies);
+const pokemonType = ref<Type[]>([]);
 const loading = ref<boolean>(false);
-
-interface PokemonStats{
-    base_stat: number;
-    effort: number;
-    name: string;
-}  
-
-interface PokemonAbilities{
-    is_hidden: boolean;
-    slot: number;
-    ability : {
-        name: string,
-        url?: string
-    }
-}
-
-// interface PokemonTypes{
-//     weakness: {
-//         double_damage_from:{name: string}[],
-//         half_damage_to: {name: string}[],
-//     },
-//     strength: {
-//         double_damage_to:{name : string}[],
-//         half_damage_from:{name: string}[],
-//     }
-// }
 
 const pokemonImg = computed(() => {
     let pokemonImage: string = "";
-    if(pokemon.value.sprites){
+    if (pokemon.value.sprites) {
         pokemonImage = pokemon.value.sprites.other?.['official-artwork'].front_default as string ?? pokemon.value.sprites.front_default as string;
     }
-    return pokemonImage; 
+    return pokemonImage;
 });
 
 const pokemonStats = computed(() => {
@@ -53,8 +29,8 @@ const pokemonStats = computed(() => {
             base_stat: stat.base_stat,
             effort: stat.effort,
             name: stat.stat.name
-            }
-        })
+        }
+    })
     return stats;
 });
 
@@ -71,21 +47,22 @@ const pokemonAbiliites = computed(() => {
     return abilities;
 })
 
-// const pokemonTypes = computed(() => {
-//     const types: PokemonTypes = pokemon.value.types.map((type) => {
-//         return {
-//             weakness: {
-//                 double_damage_from : [{name: type.type.name}],
-//                 half_damage_to : [{name: type.type.name}],
-//             },
-//             strength : {
-//                 double_damage_from : [{name: type.type.name}],
-//                 half_damage_to : [{name: type.type.name}]
-//             }
-//         }
-//     })
-//     return types;
-// })
+const pokemonTypeRelations = computed(() => {
+    const types = pokemonType.value.map((type) => type.name);
+    const pokemonTypes: Record<string, TypeData> = pokemonType.value.reduce((acc, type) => {
+        acc[type.name] = {
+            strength: [...new Set([...type.damage_relations.double_damage_to.map((damage) => damage.name)])],
+            weakness: [...new Set([...type.damage_relations.double_damage_from.map((damage) => damage.name)])],
+            resistance: [...new Set([...type.damage_relations.half_damage_from.map((damage) => damage.name)])],
+            immune: [...new Set([...type.damage_relations.no_damage_from.map((damage) => damage.name)])]
+        }
+        return acc;
+    }, {} as Record<string, TypeData>)
+
+    const pokemonTypeRelations = calculateWeaknesses(types, pokemonTypes)
+
+    return pokemonTypeRelations;
+})
 
 watchEffect(async () => {
     await PokemonData();
@@ -93,115 +70,74 @@ watchEffect(async () => {
 
 async function PokemonData() {
     loading.value = true
-    try{
-        const [pokemonValue,pokemonDescValue,pokemonTypesValue] : [Pokemon,PokemonSpecies,Type[]] = await Promise.all([getPokemon(),getPokemonDesc(),getPokemonTypes()]);
+    try {
+        const [pokemonValue, pokemonDescValue, pokemonTypesValue]: [Pokemon, PokemonSpecies, Type[]] = await Promise.all([getPokemon(props.name), getPokemonDesc(props.name), getPokemonTypes(props.name)]);
         pokemon.value = pokemonValue;
         pokemonDesc.value = pokemonDescValue;
-        pokemonTypesValue.push(...pokemonTypesValue);
-        loading.value = false;  
+        pokemonType.value = pokemonTypesValue;
+        loading.value = false;
     }
-    catch(error){
-        if(error instanceof AxiosError){
-        console.log(error.response);
+    catch (error) {
+        if (error instanceof AxiosError) {
+            console.log(error.response);
         }
         throw error;
     }
 }
-
-async function getPokemon () : Promise<Pokemon> {
-    try{
-        const response = await store.pokemonEndpoints.getPokemonByName(props.name) ;
-        if(!response) throw new Error("Pokemon data is missing");
-        return response;
-    }catch(error){
-        if(error instanceof AxiosError){
-        console.log(error.response);
-        }
-        throw error;
-    }
-}
-
-async function getPokemonDesc () : Promise<PokemonSpecies> {
-    try{
-        const response = await store.pokemonEndpoints.getPokemonSpeciesByName(props.name);
-        if(!response) throw new Error("Pokemon data is missing");
-        return response;;
-    }catch(error){
-        if(error instanceof AxiosError){
-        console.log(error.response);
-        }
-        throw error;
-    }
-}
-
-async function getPokemonTypes () : Promise<Type[]>{
-    try{
-        const pokemon = await store.pokemonEndpoints.getPokemonByName(props.name);
-
-        const types = pokemon.types.map((type) => {
-            return store.pokemonEndpoints.getTypeByName(type.type.name);
-        })
-        const responses = await Promise.all(types);
-
-        if(!responses) throw new Error("Pokemon data is missing");
-        
-        return responses;
-    }catch(error){
-        if(error instanceof AxiosError){
-        console.log(error.response);
-        }
-        throw error;
-    }
-}
-
 </script>
 
 <template>
     <div v-if="!loading" class="mx-auto pokemonDetails p-4">
-        <div class="flex pb-4 gap-2 text-2xl">
-            <h1 class="capitalize font-bold">{{ pokemon.name }}</h1>
-            <p class="text-gray-400 text-opacity-80 font-semibold">#{{ pokemon.id }}</p>
-        </div>
         <div class="pokemonContainer">
-            <img :src="pokemonImg" :alt="pokemon.name" class="mx-auto object-cover bg-slate-400">
-            <div class="text-xl px-4 space-y-4">
-                <p>{{ pokemonDesc.flavor_text_entries[3].flavor_text }}</p>
-                <div class="capitalize flex space-x-4 justify-center">
-                    <div>
-                        <h1>height</h1>
-                        <p class="lowercase">{{ pokemon.height / 10}} m</p>
-                    </div>
-                    <div>
-                        <h1>weight</h1>
-                        <p class="lowercase">{{ pokemon.weight / 10}} kg</p>
-                    </div>
-                    <div>
-                        <h1>abilities</h1>
-                        <template v-for="abilities in pokemonAbiliites" :key="abilities">
-                            <p v-if="!abilities.is_hidden">{{ abilities.ability.name }}</p>
-                        </template>
+            <div class="text-xl">
+                <img :src="pokemonImg" :alt="pokemon.name" class="mx-auto object-cover bg-slate-400">
+                <div class="flex pb-4 gap-2 text-2xl">
+                    <h1 class="capitalize font-bold">{{ pokemon.name }}</h1>
+                    <p class="text-gray-400 text-opacity-80 font-semibold">#{{ pokemon.id }}</p>
+                </div>
+                <div class="space-y-4 bg-blue-300">
+                    <p>{{ pokemonDesc.flavor_text_entries[3].flavor_text }}</p>
+                    <div class="capitalize flex justify-center space-x-4">
+                        <div>
+                            <h1>height</h1>
+                            <p class="lowercase">{{ pokemon.height / 10 }} m</p>
+                        </div>
+                        <div>
+                            <h1>weight</h1>
+                            <p class="lowercase">{{ pokemon.weight / 10 }} kg</p>
+                        </div>
+                        <div>
+                            <h1>abilities</h1>
+                            <template v-for="abilities in pokemonAbiliites" :key="abilities">
+                                <p v-if="!abilities.is_hidden">{{ abilities.ability.name }}</p>
+                            </template>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div >
-                <h1 class="text-2xl font-bold">Stats</h1>
-                <p v-for="stats in pokemonStats" :key="stats.name" class="text-xl">{{ stats.name }}:{{ stats.base_stat }}</p>
-            </div>
-            <div class="flex flex-col gap-2 capitalize">
-                <PokemonType :title="'type'" :pokemon-types="pokemon.types" />
-                <PokemonType :title="'weaknesses'" :pokemon-types="pokemon.types" />
+            <div class="flex">
+                <div class="flex flex-col gap-2 capitalize">
+                    <PokemonType :title="'type'" :pokemon-types="pokemon.types" />
+                    <PokemonType :title="'weaknesses'" :pokemon-weaknesses="pokemonTypeRelations" />
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold">Stats</h1>
+                    <p v-for="stats in pokemonStats" :key="stats.name" class="text-xl">{{ stats.name }}:{{
+                        stats.base_stat }}</p>
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <style scoped>
-    .pokemonDetails{
-        max-width: 970px;
-    }
-    .pokemonContainer{
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr) );
-        gap: 10px;
-    }
+.pokemonDetails {
+    max-width: 970px;
+}
+
+.pokemonContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 10px;
+}
 </style>
