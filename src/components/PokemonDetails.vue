@@ -3,6 +3,7 @@ import { store } from '@/store';
 import { AxiosError } from 'axios';
 import { type Pokemon, type PokemonSpecies, type Type} from 'pokenode-ts';
 import { computed, ref, watchEffect } from 'vue';
+import PokemonType from './PokemonType.vue';
 
 const props = defineProps<{
     name : string
@@ -156,22 +157,30 @@ async function getPokemonTypes () : Promise<Type[]>{
 </script>
 
 <template>
-    <div class="mx-auto pokemonDetails">
-        <div v-if="!loading" class="p-4 pokemonContainer">
-            <img :src="pokemonImg" :alt="pokemon.name" class="object-cover bg-slate-400">
-            <div class="text-xl">
+    <div v-if="!loading" class="mx-auto pokemonDetails p-4">
+        <div class="flex pb-4 gap-2 text-2xl">
+            <h1 class="capitalize font-bold">{{ pokemon.name }}</h1>
+            <p class="text-gray-400 text-opacity-80 font-semibold">#{{ pokemon.id }}</p>
+        </div>
+        <div class="pokemonContainer">
+            <img :src="pokemonImg" :alt="pokemon.name" class="mx-auto object-cover bg-slate-400">
+            <div class="text-xl px-4 space-y-4">
                 <p>{{ pokemonDesc.flavor_text_entries[3].flavor_text }}</p>
-                <div class="capitalize">
-                    <h1>height</h1>
-                    <p class="lowercase">{{ pokemon.height / 10}} m</p>
-                    <p>{{ pokemon.name }}</p>
-                    <h1>weight</h1>
-                    <p class="lowercase">{{ pokemon.weight / 10}} kg</p>
-                    <p>{{ pokemon.id }}</p>
-                    <template v-for="abilities in pokemonAbiliites" :key="abilities">
+                <div class="capitalize flex space-x-4 justify-center">
+                    <div>
+                        <h1>height</h1>
+                        <p class="lowercase">{{ pokemon.height / 10}} m</p>
+                    </div>
+                    <div>
+                        <h1>weight</h1>
+                        <p class="lowercase">{{ pokemon.weight / 10}} kg</p>
+                    </div>
+                    <div>
                         <h1>abilities</h1>
-                        <p v-if="!abilities.is_hidden">{{ abilities.ability.name }}</p>
-                    </template>
+                        <template v-for="abilities in pokemonAbiliites" :key="abilities">
+                            <p v-if="!abilities.is_hidden">{{ abilities.ability.name }}</p>
+                        </template>
+                    </div>
                 </div>
             </div>
             <div >
@@ -179,14 +188,8 @@ async function getPokemonTypes () : Promise<Type[]>{
                 <p v-for="stats in pokemonStats" :key="stats.name" class="text-xl">{{ stats.name }}:{{ stats.base_stat }}</p>
             </div>
             <div class="flex flex-col gap-2 capitalize">
-                <div>
-                    <h1 class="font-bold text-2xl">type</h1>
-                    <p v-for="types in pokemon.types" :key="types.type.name" class="bg-blue-400 p-1 rounded-md text-xl">{{ types.type.name }}</p>
-                </div>
-                <div>
-                    <h1 class="font-bold text-2xl">weaknesses</h1>
-                    <p v-for="types in pokemon.types" :key="types.type.name" class="bg-blue-400 p-1 rounded-md text-xl">{{ types.type.name }}</p>
-                </div>
+                <PokemonType :title="'type'" :pokemon-types="pokemon.types" />
+                <PokemonType :title="'weaknesses'" :pokemon-types="pokemon.types" />
             </div>
         </div>
     </div>

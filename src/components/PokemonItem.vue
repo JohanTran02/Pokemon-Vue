@@ -27,7 +27,7 @@ async function getPokemon () {
     if(error instanceof AxiosError){
       console.log(error.response);
     }
-    else throw error;
+    throw error;
   }finally{
     loading.value = false
   }
