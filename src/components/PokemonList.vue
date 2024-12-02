@@ -11,13 +11,13 @@ watch(store.pokemonList, async () => {
     if(error instanceof AxiosError){
       console.log(error.response);
     }
-    else throw error;
+    throw error;
   }
 }, {immediate:true})
 </script>
 
 <template>
-      <ul class="mx-auto">
+      <ul v-if="store.pokemonList" class="mx-auto">
           <li v-for="pokemonItem in store.pokemonList.results" :key="(pokemonItem.name)">
             <PokemonItem :pokemonName="pokemonItem.name"/>
           </li>
