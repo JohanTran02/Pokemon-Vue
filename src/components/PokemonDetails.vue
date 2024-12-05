@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { AxiosError } from 'axios';
-import { type Pokemon, type PokemonSpecies, type Type } from 'pokenode-ts';
+import { type EvolutionChain, type Pokemon, type PokemonSpecies, type Type } from 'pokenode-ts';
 import { computed, ref, watchEffect } from 'vue';
 import PokemonType from './PokemonType.vue';
-import { getPokemon, getPokemonDesc, getPokemonTypes } from './functions/fetch';
-import { calculateWeaknesses, convertTypes } from './functions/func';
+import { getEvolutionChain, getPokemon, getPokemonDesc, getPokemonTypes } from './functions/fetch';
+import { calculateWeaknesses, convertEvolutions, convertTypes } from './functions/func';
+import PokemonItem from './PokemonItem.vue';
 
 const props = defineProps<{
     id: string
@@ -13,6 +14,7 @@ const props = defineProps<{
 const pokemon = ref<Pokemon>({} as Pokemon);
 const pokemonDesc = ref<PokemonSpecies>({} as PokemonSpecies);
 const pokemonType = ref<Type[]>([]);
+const pokemonEvolution = ref<EvolutionChain>({} as EvolutionChain)
 const loading = ref<boolean>(false);
 
 const pokemonImg = computed(() => {
@@ -57,6 +59,12 @@ const pokemonTypeRelations = computed(() => {
     return pokemonTypeRelations;
 })
 
+const pokemonEvolutions = computed(() => {
+    const test = convertEvolutions(pokemonEvolution.value.chain);
+    console.log(test);
+    return test
+})
+
 watchEffect(async () => {
     await PokemonData();
 })
@@ -64,10 +72,11 @@ watchEffect(async () => {
 async function PokemonData() {
     loading.value = true
     try {
-        const [pokemonValue, pokemonDescValue, pokemonTypesValue]: [Pokemon, PokemonSpecies, Type[]] = await Promise.all([getPokemon(Number(props.id)), getPokemonDesc(Number(props.id)), getPokemonTypes(Number(props.id))]);
+        const [pokemonValue, pokemonDescValue, pokemonTypesValue, pokemonEvolutionValue]: [Pokemon, PokemonSpecies, Type[], EvolutionChain] = await Promise.all([getPokemon(Number(props.id)), getPokemonDesc(Number(props.id)), getPokemonTypes(Number(props.id)), getEvolutionChain((Number(props.id)))]);
         pokemon.value = pokemonValue;
         pokemonDesc.value = pokemonDescValue;
         pokemonType.value = pokemonTypesValue;
+        pokemonEvolution.value = pokemonEvolutionValue;
         loading.value = false;
     }
     catch (error) {
@@ -108,7 +117,7 @@ async function PokemonData() {
                     </div>
                 </div>
             </div>
-            <div class="flex">
+            <div class="flex flex-col">
                 <div class="flex flex-col gap-2 capitalize">
                     <PokemonType :title="'type'" :pokemon-types="pokemon.types" />
                     <PokemonType :title="'weaknesses'" :pokemon-weaknesses="pokemonTypeRelations" />
@@ -118,6 +127,9 @@ async function PokemonData() {
                     <p v-for="stats in pokemonStats" :key="stats.name" class="text-xl">{{ stats.name }}:{{
                         stats.base_stat }}</p>
                 </div>
+            </div>
+            <div v-for="pokemons in pokemonEvolutions" :key="pokemons.id">
+                <PokemonItem :pokemonId="pokemons.id" />
             </div>
         </div>
     </div>

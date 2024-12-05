@@ -36,7 +36,7 @@ async function getPokemonData() {
 
 <template>
   <div v-if="!loading" class="capitalize">
-    <RouterLink :to="`pokemon/${props.pokemonId}`"><img :src="pokemonImg" :alt="pokemon.name"
+    <RouterLink :to="`/pokemon/${props.pokemonId}`"><img :src="pokemonImg" :alt="pokemon.name"
         class="w-full object-cover bg-slate-400"></RouterLink>
     <p>#{{ props.pokemonId }}</p>
     <h1 class="font-bold text-xl py-2">{{ pokemon.name }}</h1>
