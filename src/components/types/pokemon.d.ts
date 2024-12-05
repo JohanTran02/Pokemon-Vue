@@ -20,6 +20,11 @@ interface TypeData {
     immune: string[], //no_damage_from
 }
 
+interface PokemonEvolutions {
+    name: string,
+    id: number,
+}
+
 interface PokemonAPIList {
     count: number;
     next: string | null;
