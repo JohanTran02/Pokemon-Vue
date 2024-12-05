@@ -1,3 +1,5 @@
+import type { Type } from "pokenode-ts";
+
 // Function to calculate weaknesses
 export function calculateWeaknesses(types: string[], pokemonTypes: Record<string, TypeData>): string[] {
     const weaknesses = new Set<string>();
@@ -17,8 +19,29 @@ export function calculateWeaknesses(types: string[], pokemonTypes: Record<string
     });
 
     // Remove resistances and immunities from weaknesses
-    resistances.forEach(strength => weaknesses.delete(strength));
+    resistances.forEach(resistance => weaknesses.delete(resistance));
     immunities.forEach(immune => weaknesses.delete(immune));
 
     return Array.from(weaknesses);
+}
+
+export function convertTypes(pokemonType: Type[]): Record<string, TypeData> {
+    const pokemonTypes: Record<string, TypeData> = pokemonType.reduce((acc, type) => {
+        acc[type.name] = {
+            strength: [...new Set([...type.damage_relations.double_damage_to.map((damage) => damage.name)])],
+            weakness: [...new Set([...type.damage_relations.double_damage_from.map((damage) => damage.name)])],
+            resistance: [...new Set([...type.damage_relations.half_damage_from.map((damage) => damage.name)])],
+            immune: [...new Set([...type.damage_relations.no_damage_from.map((damage) => damage.name)])]
+        }
+        return acc;
+    }, {} as Record<string, TypeData>)
+
+    console.log(pokemonTypes)
+    return pokemonTypes;
+}
+
+export function extractIdFromUrl(url: string): number {
+    const parts = url.split("/");
+    const idPart = parts[parts.length - 2]; // Get the second-to-last segment
+    return idPart ? parseInt(idPart, 10) : -1;
 }

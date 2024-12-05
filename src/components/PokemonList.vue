@@ -9,8 +9,8 @@ watch(store.pokemonList, getPokemonList, { immediate: true })
 
 <template>
   <ul v-if="store.pokemonList" class="mx-auto">
-    <li v-for="pokemonItem in store.pokemonList.results" :key="(pokemonItem.name)">
-      <PokemonItem :pokemonName="pokemonItem.name" />
+    <li v-for="pokemonItem in store.pokemonList.results" :key="(pokemonItem.id)">
+      <PokemonItem :pokemonId="pokemonItem.id" />
     </li>
   </ul>
 </template>

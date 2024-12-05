@@ -4,7 +4,7 @@ import PokemonDetails from './components/PokemonDetails.vue'
 
 const routes = [
     { path: '/', component: PokemonHome },
-    { path: '/pokemon/:name', component: PokemonDetails, props: true },
+    { path: '/pokemon/:id', component: PokemonDetails, props: true },
 ]
 
 const router = createRouter({

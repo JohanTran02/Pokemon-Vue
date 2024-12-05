@@ -4,10 +4,10 @@ import { type Pokemon, type PokemonSpecies, type Type } from 'pokenode-ts';
 import { computed, ref, watchEffect } from 'vue';
 import PokemonType from './PokemonType.vue';
 import { getPokemon, getPokemonDesc, getPokemonTypes } from './functions/fetch';
-import { calculateWeaknesses } from './functions/func';
+import { calculateWeaknesses, convertTypes } from './functions/func';
 
 const props = defineProps<{
-    name: string
+    id: string
 }>();
 
 const pokemon = ref<Pokemon>({} as Pokemon);
@@ -49,15 +49,8 @@ const pokemonAbiliites = computed(() => {
 
 const pokemonTypeRelations = computed(() => {
     const types = pokemonType.value.map((type) => type.name);
-    const pokemonTypes: Record<string, TypeData> = pokemonType.value.reduce((acc, type) => {
-        acc[type.name] = {
-            strength: [...new Set([...type.damage_relations.double_damage_to.map((damage) => damage.name)])],
-            weakness: [...new Set([...type.damage_relations.double_damage_from.map((damage) => damage.name)])],
-            resistance: [...new Set([...type.damage_relations.half_damage_from.map((damage) => damage.name)])],
-            immune: [...new Set([...type.damage_relations.no_damage_from.map((damage) => damage.name)])]
-        }
-        return acc;
-    }, {} as Record<string, TypeData>)
+
+    const pokemonTypes = convertTypes(pokemonType.value);
 
     const pokemonTypeRelations = calculateWeaknesses(types, pokemonTypes)
 
@@ -71,7 +64,7 @@ watchEffect(async () => {
 async function PokemonData() {
     loading.value = true
     try {
-        const [pokemonValue, pokemonDescValue, pokemonTypesValue]: [Pokemon, PokemonSpecies, Type[]] = await Promise.all([getPokemon(props.name), getPokemonDesc(props.name), getPokemonTypes(props.name)]);
+        const [pokemonValue, pokemonDescValue, pokemonTypesValue]: [Pokemon, PokemonSpecies, Type[]] = await Promise.all([getPokemon(Number(props.id)), getPokemonDesc(Number(props.id)), getPokemonTypes(Number(props.id))]);
         pokemon.value = pokemonValue;
         pokemonDesc.value = pokemonDescValue;
         pokemonType.value = pokemonTypesValue;

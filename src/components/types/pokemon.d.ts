@@ -20,3 +20,9 @@ interface TypeData {
     immune: string[], //no_damage_from
 }
 
+interface PokemonAPIList {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: { id: number }[];
+}
