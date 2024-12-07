@@ -20,7 +20,7 @@ interface TypeData {
     immune: string[], //no_damage_from
 }
 
-interface PokemonEvolutions {
+interface PokemonObject {
     name: string,
     id: number,
 }
