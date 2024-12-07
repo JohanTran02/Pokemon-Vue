@@ -1,6 +1,5 @@
 import { store } from "@/store";
 import { AxiosError } from "axios";
-import type { EvolutionChain, Pokemon, PokemonSpecies, Type } from "pokenode-ts";
 import { extractIdFromUrl } from "./func";
 
 export async function getPokemonList() {
@@ -30,7 +29,30 @@ export async function getPokemonList() {
     }
 }
 
-export async function getPokemonDesc(id: number): Promise<PokemonSpecies> {
+export async function getAllPokemons() {
+    try {
+        const response = await store.pokemonEndpoints.listPokemons(0, 2000);
+
+        if (!response) throw new Error("Pokemon data is missing");
+
+        const convertedPokemons = response.results.map((result) => {
+            return {
+                name: result.name,
+                id: extractIdFromUrl(result.url)
+            }
+        })
+
+        return convertedPokemons;
+
+    } catch (error) {
+        if (error instanceof AxiosError) {
+            console.log(error.response);
+        }
+        throw error;
+    }
+}
+
+export async function getPokemonDesc(id: number) {
     try {
         const response = await store.pokemonEndpoints.getPokemonSpeciesById(id);
         if (!response) throw new Error("Pokemon data is missing");
@@ -43,7 +65,7 @@ export async function getPokemonDesc(id: number): Promise<PokemonSpecies> {
     }
 }
 
-export async function getPokemon(id: number): Promise<Pokemon> {
+export async function getPokemon(id: number) {
     try {
         const response = await store.pokemonEndpoints.getPokemonById(id);
         if (!response) throw new Error("Pokemon data is missing");
@@ -56,7 +78,20 @@ export async function getPokemon(id: number): Promise<Pokemon> {
     }
 }
 
-export async function getPokemonTypes(id: number): Promise<Type[]> {
+export async function getPokemonByName() {
+    try {
+        const response = await store.pokemonEndpoints.listPokemons();
+        if (!response) throw new Error("Pokemon data is missing");
+        return response;
+    } catch (error) {
+        if (error instanceof AxiosError) {
+            console.log(error.response)
+        }
+        throw error;
+    }
+}
+
+export async function getPokemonTypes(id: number) {
     try {
         const pokemon = await store.pokemonEndpoints.getPokemonById(id);
 
@@ -64,7 +99,6 @@ export async function getPokemonTypes(id: number): Promise<Type[]> {
             return store.pokemonEndpoints.getTypeByName(type.type.name);
         })
         const responses = await Promise.all(types);
-        console.log(responses)
 
         if (!responses) throw new Error("Pokemon data is missing");
 
@@ -78,7 +112,7 @@ export async function getPokemonTypes(id: number): Promise<Type[]> {
 }
 
 //Fortsätt att designa evolution chain 
-export async function getEvolutionChain(id: number): Promise<EvolutionChain> {
+export async function getEvolutionChain(id: number) {
     try {
         const response = await store.evolutionEndpoints.getEvolutionChainById(id);
         if (!response) throw new Error("Pokemon data is missing");
@@ -91,3 +125,4 @@ export async function getEvolutionChain(id: number): Promise<EvolutionChain> {
         throw error;
     }
 }
+

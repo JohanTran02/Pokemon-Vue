@@ -1,6 +1,6 @@
 import type { ChainLink, Type } from "pokenode-ts";
 
-//AI-genererat
+//Alla funktioner AI-genererade
 // Function to calculate weaknesses
 export function calculateWeaknesses(types: string[], pokemonTypes: Record<string, TypeData>): string[] {
     const weaknesses = new Set<string>();
@@ -41,7 +41,7 @@ export function convertTypes(pokemonType: Type[]): Record<string, TypeData> {
 }
 
 export function convertEvolutions(evolutionChains: ChainLink) {
-    const evolutions: PokemonEvolutions[] = [];
+    const evolutions: PokemonObject[] = [];
 
     function traverse(evolutionChainNode: ChainLink) {
         if (evolutionChainNode.species) {

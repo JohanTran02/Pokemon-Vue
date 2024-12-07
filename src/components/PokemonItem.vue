@@ -5,6 +5,7 @@ import { computed, ref, watchEffect } from 'vue';
 import { getPokemon } from './functions/fetch';
 const props = defineProps<{
   pokemonId: number,
+  suggestion?: boolean
 }>()
 
 const pokemon = ref<Pokemon>({} as Pokemon)
@@ -36,13 +37,31 @@ async function getPokemonData() {
 
 <template>
   <div v-if="!loading" class="capitalize">
-    <RouterLink :to="`/pokemon/${props.pokemonId}`"><img :src="pokemonImg" :alt="pokemon.name"
-        class="w-full object-cover bg-slate-400"></RouterLink>
-    <p>#{{ props.pokemonId }}</p>
-    <h1 class="font-bold text-xl py-2">{{ pokemon.name }}</h1>
-    <div class="flex gap-2">
-      <p v-for="types in pokemon.types" :key="types.type.name" class="bg-blue-400 p-1 rounded-md">{{ types.type.name }}
-      </p>
-    </div>
+    <template v-if="!suggestion">
+      <RouterLink :to="`/pokemon/${props.pokemonId}`"><img :src="pokemonImg" :alt="pokemon.name"
+          class="w-full object-cover bg-slate-400"></RouterLink>
+      <p>#{{ props.pokemonId }}</p>
+      <h1 class="font-bold text-xl py-2">{{ pokemon.name }}</h1>
+      <div class="flex gap-2">
+        <p v-for="types in pokemon.types" :key="types.type.name" class="bg-blue-400 p-1 rounded-md">{{ types.type.name
+          }}
+        </p>
+      </div>
+    </template>
+    <template v-else>
+      <RouterLink :to="`/pokemon/${props.pokemonId}`" class="flex bg-slate-400 border border-slate-700">
+        <img :src="pokemonImg" :alt="pokemon.name" class="size-24 object-cover">
+        <div>
+          <p>#{{ props.pokemonId }}</p>
+          <h1 class="font-bold text-xl">{{ pokemon.name }}</h1>
+          <div class="flex gap-2">
+            <p v-for="types in pokemon.types" :key="types.type.name" class="bg-blue-400 p-1 rounded-md">{{
+              types.type.name
+            }}
+            </p>
+          </div>
+        </div>
+      </RouterLink>
+    </template>
   </div>
 </template>
