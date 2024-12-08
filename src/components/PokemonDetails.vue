@@ -2,7 +2,7 @@
 import { AxiosError } from 'axios';
 import type { Pokemon, PokemonSpecies, Type } from 'pokenode-ts';
 import { computed, ref, watchEffect } from 'vue';
-import { getPokemon, getPokemonDesc, getPokemonTypes } from './functions/fetch';
+import store from '@/store/pokemon';
 import { calculateWeaknesses, convertTypes, extractIdFromUrl } from './functions/func';
 import PokemonType from './PokemonType.vue';
 import PokemonEvolutions from './PokemonEvolutions.vue';
@@ -10,6 +10,8 @@ import PokemonEvolutions from './PokemonEvolutions.vue';
 const props = defineProps<{
     id: string
 }>();
+
+const { getPokemon, getPokemonDesc, getPokemonTypes } = store;
 
 const pokemon = ref<Pokemon>({} as Pokemon);
 const pokemonDesc = ref<PokemonSpecies>({} as PokemonSpecies);
@@ -90,7 +92,7 @@ async function PokemonData() {
                     <p class="text-gray-400 text-opacity-80 font-semibold">#{{ pokemon.id }}</p>
                 </div>
                 <div class="space-y-4 bg-blue-300">
-                    <p>{{ pokemonDesc.flavor_text_entries[3].flavor_text }}</p>
+                    <p>{{ pokemonDesc.flavor_text_entries[0].flavor_text }}</p>
                     <div class="capitalize flex justify-center space-x-4">
                         <div>
                             <h1>height</h1>

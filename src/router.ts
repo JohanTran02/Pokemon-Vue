@@ -1,14 +1,16 @@
-import { createMemoryHistory, createRouter } from 'vue-router'
+import { createWebHistory, createRouter } from 'vue-router'
 import PokemonHome from './components/PokemonHome.vue'
 import PokemonDetails from './components/PokemonDetails.vue'
+import NotFound from './components/NotFound.vue'
 
 const routes = [
-    { path: '/', component: PokemonHome },
-    { path: '/pokemon/:id', component: PokemonDetails, props: true },
+    { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },
+    { path: '/', name: "home", component: PokemonHome },
+    { path: '/pokemon/:id', name: "pokemon", component: PokemonDetails, props: true },
 ]
 
 const router = createRouter({
-    history: createMemoryHistory(),
+    history: createWebHistory(import.meta.env.BASE_URL),
     routes,
 })
 

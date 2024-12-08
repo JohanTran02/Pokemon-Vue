@@ -1,4 +1,4 @@
-import type { ChainLink, Type } from "pokenode-ts";
+import type { ChainLink, Pokemon, Type } from "pokenode-ts";
 
 //Alla funktioner AI-genererade
 // Function to calculate weaknesses
@@ -63,4 +63,12 @@ export function extractIdFromUrl(url: string): number {
     const parts = url.split("/");
     const idPart = parts[parts.length - 2]; // Get the second-to-last segment
     return idPart ? parseInt(idPart, 10) : -1;
+}
+
+export function getPokemonImg(pokemon: Pokemon) {
+    let pokemonImage: string = "";
+    if (pokemon.sprites) {
+        pokemonImage = pokemon.sprites.other?.['official-artwork'].front_default as string ?? pokemon.sprites.front_default as string;
+    }
+    return pokemonImage;
 }
