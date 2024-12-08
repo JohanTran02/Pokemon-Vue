@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
-import { onMounted } from 'vue';
-import store from '@/store/pokemon';
+// import { onMounted } from 'vue';
+// import store from '@/store/pokemon';
 
-const { getAllPokemons } = store;
+// const { getAllPokemons } = store;
 
-onMounted(async () => {
-  if (store.pokemons.length === 0) {
-    await getAllPokemons();
-  }
-})
+// onMounted(async () => {
+//   if (store.pokemons.length === 0) {
+//     await getAllPokemons();
+//   }
+// })
 
 </script>
 
