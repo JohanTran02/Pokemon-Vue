@@ -89,7 +89,7 @@ return acc;
 
 ### convertEvolutions
 
-Denna funktion tar en evolutionär kedja och traverserar den för att samla information om alla Pokémon som ingår i kedjan.
+Denna funktion tar en pokémons evolutionskedja och traverserar den för att samla information om alla Pokémon som ingår i kedjan.
 Den returnerar en lista över Pokémon med deras namn och ID:n.
 
 - **Fil**: `func.ts`
