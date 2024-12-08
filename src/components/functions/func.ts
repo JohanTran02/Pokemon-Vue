@@ -1,6 +1,6 @@
-import type { ChainLink, Pokemon, Type } from "pokenode-ts";
+import type { ChainLink, Type } from "pokenode-ts";
 
-//Alla funktioner AI-genererade
+// Alla funktioner AI-genererade med justeringar
 // Function to calculate weaknesses
 export function calculateWeaknesses(types: string[], pokemonTypes: Record<string, TypeData>): string[] {
     const weaknesses = new Set<string>();
@@ -63,12 +63,4 @@ export function extractIdFromUrl(url: string): number {
     const parts = url.split("/");
     const idPart = parts[parts.length - 2]; // Get the second-to-last segment
     return idPart ? parseInt(idPart, 10) : -1;
-}
-
-export function getPokemonImg(pokemon: Pokemon) {
-    let pokemonImage: string = "";
-    if (pokemon.sprites) {
-        pokemonImage = pokemon.sprites.other?.['official-artwork'].front_default as string ?? pokemon.sprites.front_default as string;
-    }
-    return pokemonImage;
 }

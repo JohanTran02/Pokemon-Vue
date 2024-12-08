@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import PokemonList from './PokemonList.vue';
 import PokemonInput from './PokemonInput.vue';
-
 </script>
 
 <template>
