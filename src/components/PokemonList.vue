@@ -3,18 +3,23 @@ import { watch } from 'vue';
 import PokemonCard from './PokemonCard.vue';
 import store from '@/store/pokemon';
 
-const { getPokemonList, } = store;
+const { getPokemonList } = store;
 
-watch(store.pokemonList, getPokemonList, { immediate: true })
+watch(store.pokemonCards, getPokemonList, { immediate: true })
 
 </script>
 
 <template>
-  <ul v-if="store.pokemonList" class="mx-auto">
-    <li v-for="PokemonCard in store.pokemonList.results" :key="(PokemonCard.id)">
-      <PokemonCard :pokemonId="PokemonCard.id" />
-    </li>
-  </ul>
+  <div v-if="store.pokemonCards && store.pokemonCards.length > 0">
+    <ul class="mx-auto">
+      <li v-for="pokemonCard in store.pokemonCards" :key="pokemonCard.id">
+        <PokemonCard :pokemonCard="pokemonCard" />
+      </li>
+    </ul>
+    <div class="flex justify-center ">
+      <button @click="store.incrementOffset" class=" bg-blue-400 my-4 p-2 rounded-md">Load more Pokémons</button>
+    </div>
+  </div>
 </template>
 
 <style scoped>
