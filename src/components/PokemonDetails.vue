@@ -3,7 +3,7 @@ import { AxiosError } from 'axios';
 import type { Pokemon, PokemonSpecies, Type } from 'pokenode-ts';
 import { computed, ref, watchEffect } from 'vue';
 import store from '@/store/pokemon';
-import { calculateWeaknesses, convertTypes, extractIdFromUrl } from './functions/func';
+import { calculateWeaknesses, convertTypes } from './functions/func';
 import PokemonType from './PokemonType.vue';
 import PokemonEvolutions from './PokemonEvolutions.vue';
 
@@ -11,11 +11,12 @@ const props = defineProps<{
     id: string
 }>();
 
-const { getPokemon, getPokemonDesc, getPokemonTypes } = store;
+const { getPokemon, getPokemonDesc, getPokemonTypes, getEvolutionChain } = store;
 
 const pokemon = ref<Pokemon>({} as Pokemon);
 const pokemonDesc = ref<PokemonSpecies>({} as PokemonSpecies);
 const pokemonType = ref<Type[]>([]);
+const evolutionChain = ref<Pokemon[]>([])
 const loading = ref<boolean>(false);
 
 const pokemonImg = computed(() => {
@@ -67,10 +68,17 @@ watchEffect(async () => {
 async function PokemonData() {
     loading.value = true
     try {
-        const [pokemonValue, pokemonDescValue, pokemonTypesValue]: [Pokemon, PokemonSpecies, Type[]] = await Promise.all([getPokemon(Number(props.id)), getPokemonDesc(Number(props.id)), getPokemonTypes(Number(props.id))]);
-        pokemon.value = pokemonValue;
+        const [pokemonValue, pokemonDescValue, pokemonTypesValue, evolutionChainValue]: [Pokemon, PokemonSpecies, Type[], Pokemon[]] = await Promise.all(
+            [
+                getPokemon(Number(props.id)),
+                getPokemonDesc(Number(props.id)),
+                getPokemonTypes(Number(props.id)),
+                getEvolutionChain(Number(props.id)),
+            ]);
         pokemonDesc.value = pokemonDescValue;
+        pokemon.value = pokemonValue;
         pokemonType.value = pokemonTypesValue;
+        evolutionChain.value = evolutionChainValue;
         loading.value = false;
     }
     catch (error) {
@@ -121,8 +129,7 @@ async function PokemonData() {
                     <p v-for="stats in pokemonStats" :key="stats.name" class="text-xl">{{ stats.name }}:{{
                         stats.base_stat }}</p>
                 </div>
-                <PokemonEvolutions v-if="pokemonDesc.evolution_chain.url"
-                    :evolution-id="extractIdFromUrl(pokemonDesc.evolution_chain.url)" class="flex" />
+                <PokemonEvolutions v-if="evolutionChain.length > 0" :evolution-chain="evolutionChain" class="flex" />
             </div>
         </div>
     </div>
