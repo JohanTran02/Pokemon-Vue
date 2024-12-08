@@ -1,18 +1,24 @@
 <script setup lang="ts">
+import store from '@/store/pokemon';
 import { AxiosError } from 'axios';
 import { type Pokemon } from 'pokenode-ts';
 import { computed, ref, watchEffect } from 'vue';
-import { getPokemon } from './functions/fetch';
+
 const props = defineProps<{
   pokemonId: number,
   suggestion?: boolean
 }>()
 
+const { getPokemon } = store;
+
 const pokemon = ref<Pokemon>({} as Pokemon)
 const loading = ref<boolean>(false);
 
 const pokemonImg = computed(() => {
-  const pokemonImage: string = pokemon.value.sprites.other?.['official-artwork'].front_default as string ?? pokemon.value.sprites.front_default as string;
+  let pokemonImage: string = "";
+  if (pokemon.value.sprites) {
+    pokemonImage = pokemon.value.sprites.other?.['official-artwork'].front_default as string ?? pokemon.value.sprites.front_default as string;
+  }
   return pokemonImage;
 });
 

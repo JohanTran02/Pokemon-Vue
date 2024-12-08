@@ -1,47 +1,49 @@
 <script setup lang="ts">
-import { store } from '@/store';
 import { onWatcherCleanup, ref, watch } from 'vue';
-import PokemonItem from './PokemonItem.vue';
+import store from '@/store/pokemon';
+import { AxiosError } from 'axios';
+import { useRouter } from 'vue-router';
+import PokemonSuggestions from './PokemonSuggestions.vue';
 
-// const pokemonSuggestions = ref<Pokemon>({} as Pokemon)
 const inputValue = ref("")
-// const debouncedValue = ref(""); // The debounced result
 const pokemonSuggestions = ref<PokemonObject[]>([])
+const router = useRouter();
+const debouncedValue = ref("");
+
+const { getPokemonByName } = store;
 
 // Debouncing logic inside a watchEffect
 let timeout: ReturnType<typeof setTimeout>; // For debouncing
 
-watch(inputValue, (debouncedValue) => {
-    const pattern = new RegExp("^" + debouncedValue, "gi")
+watch(inputValue, (newValue) => {
     timeout = setTimeout(async () => {
-        // debouncedValue.value = newValue;
+        const pattern = new RegExp("^" + newValue, "gi")
+        debouncedValue.value = inputValue.value;
         if (store.pokemons.length > 0) {
             pokemonSuggestions.value = store.pokemons.filter((pokemon) => pokemon.name.match(pattern)) // Filter by name
         }
-        console.log(pokemonSuggestions.value)
     }, 500);
 
     onWatcherCleanup(() => clearTimeout(timeout));
 });
+
+async function getPokemon(input: string) {
+    try {
+        const pokemon = await getPokemonByName(input);
+        await router.push({ name: "pokemon", params: { id: pokemon.id } })
+    } catch (error) {
+        if (error instanceof AxiosError) {
+            await router.push({ name: "NotFound" })
+        }
+    }
+}
 
 </script>
 
 <template>
     <div class="flex justify-center ">
         <input type="text" v-model="inputValue">
-        <button>Submit</button>
+        <button @click="getPokemon(inputValue)">Submit</button>
     </div>
-
-    <ul v-if="(pokemonSuggestions.length && inputValue.length) > 0">
-        <li v-for="pokemon in pokemonSuggestions" :key="pokemon.id">
-            <PokemonItem :pokemon-id="pokemon.id" :suggestion="true" />
-        </li>
-    </ul>
+    <PokemonSuggestions :pokemon-suggestions="pokemonSuggestions" :input="debouncedValue" />
 </template>
-
-<style scoped>
-ul {
-    height: 300px;
-    overflow-y: scroll;
-}
-</style>

@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import { watch } from 'vue';
-import PokemonItem from './PokemonItem.vue';
-import { store } from '@/store';
-import { getPokemonList } from './functions/fetch';
+import PokemonCard from './PokemonCard.vue';
+import store from '@/store/pokemon';
+
+const { getPokemonList, } = store;
 
 watch(store.pokemonList, getPokemonList, { immediate: true })
+
 </script>
 
 <template>
   <ul v-if="store.pokemonList" class="mx-auto">
-    <li v-for="pokemonItem in store.pokemonList.results" :key="(pokemonItem.id)">
-      <PokemonItem :pokemonId="pokemonItem.id" />
+    <li v-for="PokemonCard in store.pokemonList.results" :key="(PokemonCard.id)">
+      <PokemonCard :pokemonId="PokemonCard.id" />
     </li>
   </ul>
 </template>

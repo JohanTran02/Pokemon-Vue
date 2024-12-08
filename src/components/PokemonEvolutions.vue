@@ -2,13 +2,15 @@
 import { computed, ref, watchEffect } from 'vue';
 import { convertEvolutions } from './functions/func';
 import type { EvolutionChain } from 'pokenode-ts';
-import { getEvolutionChain } from './functions/fetch';
+import store from '@/store/pokemon';
 import { AxiosError } from 'axios';
-import PokemonItem from './PokemonItem.vue';
+import PokemonCard from './PokemonCard.vue';
 
 const props = defineProps<{
     evolutionId: number
 }>();
+
+const { getEvolutionChain } = store;
 
 const loading = ref<boolean>(false);
 const pokemonEvolution = ref<EvolutionChain>({} as EvolutionChain)
@@ -42,7 +44,7 @@ async function getPokemonData() {
 <template>
     <div v-if="!loading && pokemonEvolution.chain.evolves_to.length > 0">
         <div v-for="pokemons in pokemonEvolutions" :key="pokemons.id">
-            <PokemonItem :pokemonId="pokemons.id" />
+            <PokemonCard :pokemonId="pokemons.id" />
         </div>
     </div>
 </template>
